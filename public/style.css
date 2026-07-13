@@ -1,106 +1,354 @@
-body{
-
-    margin:0;
-    background:#202124;
-    color:white;
-
-    font-family:Arial, Helvetica, sans-serif;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    height:100vh;
-
+body {
+    margin: 0;
+    background: #202124;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-.hidden{
-
-    display:none;
-
+.hidden {
+    display: none !important;
 }
 
 #joinScreen,
-#lobbyScreen{
-
-    width:400px;
-
-    background:#2b2b2b;
-
-    padding:30px;
-
-    border-radius:15px;
-
-    text-align:center;
-
-    box-shadow:0 0 20px rgba(0,0,0,.4);
-
+#lobbyScreen {
+    width: 400px;
+    background: #2b2b2b;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 0, 0, .4);
 }
 
-input{
-
-    width:100%;
-
-    padding:12px;
-
-    margin-top:20px;
-
-    font-size:18px;
-
-    border:none;
-
-    border-radius:8px;
-
-    box-sizing:border-box;
-
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
-button{
-
-    width:100%;
-
-    margin-top:20px;
-
-    padding:12px;
-
-    font-size:18px;
-
-    cursor:pointer;
-
-    border:none;
-
-    border-radius:8px;
-
-    background:#0b84ff;
-
-    color:white;
-
+button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #0b84ff;
+    color: white;
+    font-weight: bold;
 }
 
-button:hover{
-
-    background:#006be6;
-
+button:hover {
+    background: #006be6;
 }
 
-ul{
-
-    list-style:none;
-
-    padding:0;
-
+ul {
+    list-style: none;
+    padding: 0;
 }
 
-li{
+li {
+    background: #444;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+}
 
-    background:#444;
+/* ==========================================================================
+   GAME SCREEN STYLES
+   ========================================================================== */
 
-    padding:10px;
+#gameScreen {
+    width: 90vw;
+    max-width: 1000px;
+    background: #2b2b2b;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-    margin-top:8px;
+.game-header {
+    background: #1a1a1a;
+    padding: 15px 25px;
+    border-bottom: 2px solid #444;
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: bold;
+}
 
-    border-radius:8px;
+.turn-indicator span {
+    color: #0b84ff;
+}
 
+.direction-indicator span {
+    color: #55aa55;
+}
+
+.game-body {
+    display: flex;
+    flex: 1;
+    min-height: 400px;
+}
+
+.players-sidebar {
+    width: 250px;
+    background: #222;
+    border-right: 2px solid #444;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.players-sidebar h3 {
+    margin-top: 0;
+    color: #888;
+    font-size: 16px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+#opponentsList {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.opponent-item {
+    background: #2e2e2e;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.opponent-item.active-turn {
+    background: #2a3c50;
+    border-color: #0b84ff;
+    box-shadow: 0 0 8px rgba(11, 132, 255, 0.4);
+}
+
+.opponent-item .opp-name {
+    font-weight: bold;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.opponent-item .opp-cards {
+    background: #ff5555;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.play-table {
+    flex: 1;
+    background: radial-gradient(circle, #383a3f 0%, #18191c 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.deck-container {
+    display: flex;
+    gap: 40px;
+}
+
+.pile-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.pile-wrapper h4 {
+    margin: 0;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   CARD SYSTEM STYLES
+   ========================================================================== */
+
+.card {
+    width: 100px;
+    height: 150px;
+    border-radius: 12px;
+    border: 4px solid white;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 8px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    position: relative;
+    user-select: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Card inner ellipse */
+.card-inner {
+    width: 80%;
+    height: 60%;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-inner {
+    background: #ffaa00;
+    border: 2px solid white;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-style: italic;
+    color: #ff5555;
+    text-shadow: 1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white;
+    transform: rotate(-10deg);
+}
+
+.center-text {
+    font-size: 32px;
+    transform: rotate(20deg);
+}
+
+/* Corner indices */
+.corner {
+    font-size: 16px;
+    align-self: flex-start;
+}
+
+.corner.bottom-right {
+    align-self: flex-end;
+    transform: rotate(180deg);
+}
+
+/* Card color styles */
+.card.red {
+    background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%);
+    color: white;
+}
+
+.card.yellow {
+    background: linear-gradient(135deg, #ffcc00 0%, #cca300 100%);
+    color: black;
+    text-shadow: none;
+    border-color: #333;
+}
+
+.card.green {
+    background: linear-gradient(135deg, #33cc33 0%, #249924 100%);
+    color: white;
+}
+
+.card.blue {
+    background: linear-gradient(135deg, #3366ff 0%, #1a41cc 100%);
+    color: white;
+}
+
+.card.wild {
+    background: linear-gradient(135deg, #222222 0%, #444444 100%);
+    color: white;
+}
+
+/* Wild inner ellipse shows 4-quadrant color wheels */
+.card.wild .card-inner {
+    background: radial-gradient(circle, transparent 20%, rgba(255,255,255,0.2) 21%, transparent 22%),
+                conic-gradient(#ff3333 0deg 90deg, #3366ff 90deg 180deg, #33cc33 180deg 270deg, #ffcc00 270deg 360deg);
+    border: 1px solid white;
+}
+
+/* Draw deck specific */
+.draw-deck {
+    background: linear-gradient(135deg, #7d0000 0%, #c30000 100%);
+    color: white;
+    cursor: default;
+}
+
+.badge {
+    position: absolute;
+    bottom: -12px;
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    font-weight: bold;
+}
+
+/* Empty or hidden cards */
+.card-placeholder {
+    width: 100px;
+    height: 150px;
+    border-radius: 12px;
+    border: 4px dashed #666;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   FOOTER / HAND STYLES
+   ========================================================================== */
+
+.game-footer {
+    background: #1e1e1e;
+    padding: 20px;
+    border-top: 2px solid #444;
+}
+
+.game-footer h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #888;
+}
+
+.hand {
+    display: flex;
+    gap: 12px;
+    padding: 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    overflow-x: auto;
+    min-height: 170px;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.hand:empty::after {
+    content: "No cards in hand";
+    color: #666;
+    font-style: italic;
+    font-size: 14px;
+    margin: auto;
 }
