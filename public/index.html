@@ -1,20 +1,51 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>UNO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO Multiplayer</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>UNO</h1>
+<div id="joinScreen">
 
-<p>If you can see this, your server works!</p>
+    <h1>UNO Multiplayer</h1>
+
+    <input
+        id="nameInput"
+        type="text"
+        placeholder="Enter your name"
+        maxlength="20"
+    >
+
+    <button id="joinButton">
+        Join Game
+    </button>
+
+</div>
+
+<div id="lobbyScreen" class="hidden">
+
+    <h1>Lobby</h1>
+
+    <h3>Players</h3>
+
+    <ul id="playerList">
+
+    </ul>
+
+    <button id="startButton" class="hidden">
+        Start Game
+    </button>
+
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="script.js"></script>
+<script src="ui.js"></script>
 
 </body>
 </html>
