@@ -4,14 +4,15 @@ const joinScreen = document.getElementById("joinScreen");
 const lobbyScreen = document.getElementById("lobbyScreen");
 
 const joinButton = document.getElementById("joinButton");
+const startButton = document.getElementById("startButton");
 
 const nameInput = document.getElementById("nameInput");
 
-joinButton.addEventListener("click", ()=>{
+joinButton.addEventListener("click", () => {
 
     const name = nameInput.value.trim();
 
-    if(name.length===0){
+    if (name.length === 0) {
 
         alert("Enter your name.");
 
@@ -19,10 +20,16 @@ joinButton.addEventListener("click", ()=>{
 
     }
 
-    socket.emit("join",{
+    socket.emit("join", {
 
-        name:name
+        name: name
 
     });
+
+});
+
+startButton.addEventListener("click", () => {
+
+    socket.emit("startGame");
 
 });
