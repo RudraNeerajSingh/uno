@@ -24,6 +24,7 @@ function broadcastGameState() {
             started: room.started,
             currentPlayer: room.currentPlayer,
             direction: room.direction,
+            currentColor: room.currentColor,
             topCard: room.discardPile.length > 0 ? room.discardPile[room.discardPile.length - 1] : null,
             deckCount: room.deck.length,
             hand: player.hand,
@@ -93,7 +94,7 @@ io.on("connection", (socket) => {
     socket.on("playCard", (data) => {
         if (!room.started) return;
 
-        const result = playCardAction(room, socket.id, data.cardIndex);
+        const result = playCardAction(room, socket.id, data.cardIndex,data.chosenColor);
         if (result.success) {
             if (result.winner) {
                 console.log(`\n========== GAME OVER: ${result.winner} wins! ==========\n`);

@@ -44,6 +44,12 @@ function isValidPlay(card, topCard) {
         case "draw2":
         return topCard.value === "draw2";
 
+        case "wild":
+        return true;
+
+        case "draw4":
+        return true;
+
         default:
             return false;
 

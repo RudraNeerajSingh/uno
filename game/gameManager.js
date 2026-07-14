@@ -14,6 +14,7 @@ function startGame(room) {
     room.direction = 1;
     room.pendingDraw = 0;
     room.pendingDrawType = null;
+    room.currentColor = null;
     room.discardPile = [];
     room.deck = createDeck();
     shuffleDeck(room.deck);
@@ -94,7 +95,7 @@ function drawCards(room, player, amount) {
 
 }
 
-function playCardAction(room, socketId, cardIndex) {
+function playCardAction(room, socketId, cardIndex,chosenColor = null) {
 
     const playerIdx = room.players.findIndex(
         p => p.id === socketId
@@ -169,6 +170,10 @@ function playCardAction(room, socketId, cardIndex) {
     player.hand.splice(cardIndex, 1);
 
     room.discardPile.push(card);
+    // Any normal colored card clears the previous Wild color
+    if (card.color !== null) {
+        room.currentColor = null;
+    }
 
     // --------------------------
     // Winner
@@ -183,6 +188,7 @@ function playCardAction(room, socketId, cardIndex) {
         room.direction = 1;
         room.pendingDraw = 0;
         room.pendingDrawType = null;
+        room.currentColor = null;
 
         room.players.forEach(player => {
             player.hand = [];
@@ -238,6 +244,15 @@ function playCardAction(room, socketId, cardIndex) {
         advanceTurn(room);
 
         break;
+
+    case "wild":
+
+       // Placeholder until the color picker is implemented
+        room.currentColor = "red";
+
+        advanceTurn(room);
+
+    break;
 
         default:
 
