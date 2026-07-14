@@ -4,79 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNO Multiplayer</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="joinScreen">
-    <h1>UNO Multiplayer</h1>
-    <input
-        id="nameInput"
-        type="text"
-        placeholder="Enter your name"
-        maxlength="20"
-    >
-    <button id="joinButton">
-        Join Game
-    </button>
-</div>
+    <!-- ========================= -->
+    <!-- JOIN SCREEN -->
+    <!-- ========================= -->
 
-<div id="lobbyScreen" class="hidden">
-    <h1>Lobby</h1>
-    <h3>Players</h3>
-    <ul id="playerList"></ul>
-    <button id="startButton" class="hidden">
-        Start Game
-    </button>
-</div>
+    <div id="joinScreen">
 
-<div id="gameScreen" class="hidden">
-    <div class="game-header">
-        <div class="turn-indicator">
-            Current Turn: <span id="activeTurnName">-</span>
-        </div>
-        <div class="direction-indicator">
-            Play Direction: <span id="playDirectionText">Clockwise</span>
-        </div>
+        <h1>UNO Multiplayer</h1>
+
+        <input
+            id="nameInput"
+            type="text"
+            placeholder="Enter your name"
+            maxlength="20"
+        >
+
+        <button id="joinButton">
+            Join Game
+        </button>
+
     </div>
 
-    <div class="game-body">
-        <div class="players-sidebar">
-            <h3>Players &amp; Cards</h3>
-            <div id="opponentsList"></div>
-        </div>
 
-        <div class="play-table">
-            <div class="deck-container">
-                <div class="pile-wrapper">
-                    <h4>Draw Pile</h4>
-                    <div class="card draw-deck">
-                        <div class="card-inner logo-inner">
-                            <span class="logo-text">UNO</span>
-                        </div>
-                        <div id="deckCountText" class="badge">0</div>
-                    </div>
-                </div>
+    <!-- ========================= -->
+    <!-- LOBBY -->
+    <!-- ========================= -->
 
-                <div class="pile-wrapper">
-                    <h4>Discard Pile</h4>
-                    <div id="topCardDisplay">
-                        <!-- Top card of discard pile will be inserted here -->
-                    </div>
-                </div>
+    <div id="lobbyScreen" class="hidden">
+
+        <h1>Lobby</h1>
+
+        <h3>Players</h3>
+
+        <ul id="playerList"></ul>
+
+        <button
+            id="startButton"
+            class="hidden"
+        >
+            Start Game
+        </button>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- GAME -->
+    <!-- ========================= -->
+
+    <div id="gameScreen" class="hidden">
+
+        <!-- HEADER -->
+
+        <div class="game-header">
+
+            <div class="turn-indicator">
+                Current Turn:
+                <span id="activeTurnName">-</span>
             </div>
+
+            <div class="direction-indicator">
+                Play Direction:
+                <span id="playDirectionText">
+                    Clockwise
+                </span>
+            </div>
+
         </div>
+
+
+        <!-- BODY -->
+
+        <div class="game-body">
+
+            <div class="players-sidebar">
+
+                <h3>Players &amp; Cards</h3>
+
+                <div id="opponentsList"></div>
+
+            </div>
+
+
+            <div class="play-table">
+
+                <div class="deck-container">
+
+                    <div class="pile-wrapper">
+
+                        <h4>Draw Pile</h4>
+
+                        <div class="card draw-deck">
+
+                            <div class="card-inner logo-inner">
+
+                                <span class="logo-text">
+                                    UNO
+                                </span>
+
+                            </div>
+
+                            <div
+                                id="deckCountText"
+                                class="badge"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="pile-wrapper">
+
+                        <h4>Discard Pile</h4>
+
+                        <div id="topCardDisplay"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="game-footer">
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:15px;
+                "
+            >
+
+                <h3>
+                    Your Hand
+                    (<span id="handCountText">0</span> cards)
+                </h3>
+
+                <button
+                    id="drawButton"
+                    type="button"
+                >
+                    Draw Card
+                </button>
+
+            </div>
+
+            <div
+                id="playerHand"
+                class="hand"
+            ></div>
+
+        </div>
+
     </div>
 
-    <div class="game-footer">
-        <h3>Your Hand (<span id="handCountText">0</span> cards)</h3>
-        <div id="playerHand" class="hand"></div>
-    </div>
-</div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="script.js"></script>
-<script src="ui.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="script.js"></script>
+
+    <script src="ui.js"></script>
 
 </body>
 </html>
