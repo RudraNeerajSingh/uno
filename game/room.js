@@ -1,21 +1,28 @@
 class Room {
 
-    constructor(){
+    constructor() {
 
-        this.players=[];
+        this.players = [];
 
-        this.deck=[];
+        this.deck = [];
 
-        this.discardPile=[];
+        this.discardPile = [];
 
-        this.currentPlayer=0;
+        this.currentPlayer = 0;
 
-        this.direction=1;
+        this.direction = 1;
 
-        this.started=false;
+        this.started = false;
+
+        // House Rules Engine
+        this.pendingDraw = 0;
+        this.pendingDrawType = null;
+
+        // Reserved for Wild cards
+        this.currentColor = null;
 
     }
 
 }
 
-module.exports=Room;
+module.exports = Room;
