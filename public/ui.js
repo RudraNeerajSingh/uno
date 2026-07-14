@@ -82,11 +82,11 @@ function createCardHTML(card) {
 
     }
 
-    const isWild = card.color === "wild";
+    const isWild = card.color === null;
 
     return `
 
-    <div class="card ${card.color}">
+    <div class="card ${card.color ?? "wild"}">
 
         <div class="corner top-left">
             ${displayValue}
@@ -283,14 +283,53 @@ socket.on("gameState", (state) => {
 
             element.addEventListener("click", () => {
 
-                socket.emit("playCard", {
+    // Wild card
+    if (card.value === "wild") {
 
-                    cardIndex: index
+        let chosenColor = prompt(
+            "Choose a color:\nred\nyellow\ngreen\nblue"
+        );
 
-                });
+        if (!chosenColor) {
+            return;
+        }
 
-            });
+        chosenColor = chosenColor.toLowerCase().trim();
 
+        if (
+            chosenColor !== "red" &&
+            chosenColor !== "yellow" &&
+            chosenColor !== "green" &&
+            chosenColor !== "blue"
+        ) {
+
+            alert("Invalid color.");
+
+            return;
+
+        }
+
+        socket.emit("playCard", {
+
+            cardIndex: index,
+
+            chosenColor
+
+        });
+
+        return;
+
+    }
+
+    // Every other card
+
+    socket.emit("playCard", {
+
+        cardIndex: index
+
+    });
+
+});
         } else {
 
             element.style.opacity = "0.6";

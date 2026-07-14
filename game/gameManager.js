@@ -247,12 +247,25 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
 
     case "wild":
 
-       // Placeholder until the color picker is implemented
-        room.currentColor = "red";
+        if (
+            chosenColor !== "red" &&
+            chosenColor !== "yellow" &&
+            chosenColor !== "green" &&
+            chosenColor !== "blue"
+        ) {
+
+            return {
+                success: false,
+                reason: "Please choose a valid color."
+            };
+
+        }
+
+        room.currentColor = chosenColor;
 
         advanceTurn(room);
 
-    break;
+        break;
 
         default:
 
