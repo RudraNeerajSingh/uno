@@ -5,7 +5,7 @@ const { drawCard } = require("./deck");
  * Currently supports ONLY number cards.
  * Action cards will be added later.
  */
-function isPlayable(card, topCard) {
+function isValidPlay(card, topCard) {
 
     if (!card || !topCard) {
         return false;
@@ -134,7 +134,7 @@ function playCard(room, playerId, cardIndex) {
         ];
 
     if (
-        !isPlayable(
+        !isValidPlay(
             selectedCard,
             topCard
         )
@@ -147,13 +147,13 @@ function playCard(room, playerId, cardIndex) {
 
     }
 
-    // Remove from hand
+    // Remove card from hand
     currentPlayer.hand.splice(cardIndex, 1);
 
     // Add to discard pile
     room.discardPile.push(selectedCard);
 
-    // Winner?
+    // Winner
     if (currentPlayer.hand.length === 0) {
 
         return {
@@ -184,7 +184,7 @@ function checkWinner(room) {
 
 module.exports = {
 
-    isPlayable,
+    isValidPlay,
 
     advanceTurn,
 
