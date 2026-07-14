@@ -14,7 +14,6 @@ const gameScreen = document.getElementById("gameScreen");
 
 const joinButton = document.getElementById("joinButton");
 const startButton = document.getElementById("startButton");
-const drawButton = document.getElementById("drawButton");
 
 const nameInput = document.getElementById("nameInput");
 
@@ -34,6 +33,8 @@ joinButton.addEventListener("click", () => {
 
     }
 
+    joinButton.disabled = true;
+
     socket.emit("join", {
         name
     });
@@ -51,21 +52,7 @@ startButton.addEventListener("click", () => {
 });
 
 // ==============================
-// DRAW CARD
-// ==============================
-
-if (drawButton) {
-
-    drawButton.addEventListener("click", () => {
-
-        socket.emit("drawCard");
-
-    });
-
-}
-
-// ==============================
-// CONNECTION EVENTS
+// BASIC CONNECTION EVENTS
 // ==============================
 
 socket.on("connect", () => {
@@ -77,5 +64,25 @@ socket.on("connect", () => {
 socket.on("disconnect", () => {
 
     console.log("Disconnected from server.");
+
+    joinButton.disabled = false;
+
+});
+
+// ==============================
+// BASIC ERROR HANDLING
+// ==============================
+
+socket.on("joinError", (message) => {
+
+    joinButton.disabled = false;
+
+    alert(message);
+
+});
+
+socket.on("playerList", () => {
+
+    joinButton.disabled = false;
 
 });
