@@ -12,6 +12,8 @@ function startGame(room) {
     room.started = true;
     room.currentPlayer = 0;
     room.direction = 1;
+    room.pendingDraw = 0;
+    room.pendingDrawType = null;
     room.discardPile = [];
     room.deck = createDeck();
     shuffleDeck(room.deck);
@@ -51,6 +53,44 @@ function advanceTurn(room, steps = 1) {
             (room.direction * steps) +
             (totalPlayers * steps)
         ) % totalPlayers;
+
+}
+
+function reshuffleDeck(room) {
+
+    if (room.deck.length > 0) {
+        return;
+    }
+
+    if (room.discardPile.length <= 1) {
+        return;
+    }
+
+    const topCard = room.discardPile.pop();
+
+    room.deck = [...room.discardPile];
+
+    shuffleDeck(room.deck);
+
+    room.discardPile = [topCard];
+
+}
+
+function drawCards(room, player, amount) {
+
+    for (let i = 0; i < amount; i++) {
+
+        reshuffleDeck(room);
+
+        if (room.deck.length === 0) {
+            break;
+        }
+
+        player.hand.push(
+            drawCard(room.deck)
+        );
+
+    }
 
 }
 
@@ -123,6 +163,8 @@ function playCardAction(room, socketId, cardIndex) {
         room.started = false;
         room.currentPlayer = 0;
         room.direction = 1;
+        room.pendingDraw = 0;
+        room.pendingDrawType = null;
 
         room.players.forEach(player => {
             player.hand = [];
@@ -188,29 +230,35 @@ function playCardAction(room, socketId, cardIndex) {
 }
 
 function drawCardAction(room, socketId) {
-    const playerIdx = room.players.findIndex(p => p.id === socketId);
-    if (playerIdx === -1 || playerIdx !== room.currentPlayer) {
-        return { success: false, reason: "Not your turn." };
-    }
 
-    // Reshuffle discard pile if deck is exhausted
-    if (room.deck.length === 0) {
-        if (room.discardPile.length <= 1) {
-            return { success: false, reason: "No cards left in the deck to draw." };
-        }
-        const topCard = room.discardPile.pop();
-        room.deck = [...room.discardPile];
-        shuffleDeck(room.deck);
-        room.discardPile = [topCard];
+    const playerIdx = room.players.findIndex(
+        p => p.id === socketId
+    );
+
+    if (
+        playerIdx === -1 ||
+        playerIdx !== room.currentPlayer
+    ) {
+        return {
+            success: false,
+            reason: "Not your turn."
+        };
     }
 
     const player = room.players[playerIdx];
-    const drawnCard = drawCard(room.deck);
-    player.hand.push(drawnCard);
+
+    drawCards(room, player, 1);
+
+    const drawnCard =
+        player.hand[player.hand.length - 1];
 
     advanceTurn(room);
 
-    return { success: true, card: drawnCard };
+    return {
+        success: true,
+        card: drawnCard
+    };
+
 }
 
 module.exports = {
