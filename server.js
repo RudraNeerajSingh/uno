@@ -5,7 +5,9 @@ const { Server } = require("socket.io");
 const Room = require("./game/room");
 
 const {
-    startGame
+    startGame,
+    playCardAction,
+    drawCardAction
 } = require("./game/gameManager");
 
 const app = express();
@@ -40,13 +42,11 @@ io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
 
     socket.on("join", (data) => {
-        // Fix duplicate joins by socket ID
         if (room.players.some(p => p.id === socket.id)) {
             console.log("Socket already in room:", socket.id);
             return;
         }
 
-        // Do not allow joining an active game
         if (room.started) {
             socket.emit("joinError", "Game has already started.");
             return;
@@ -61,14 +61,11 @@ io.on("connection", (socket) => {
 
         room.players.push(player);
 
-        // Broadcast player list
         io.emit("playerList", room.players.map(p => ({ id: p.id, name: p.name })));
 
-        // If first player, designate as host
         if (room.players.length === 1) {
             socket.emit("host");
         } else {
-            // Let the first player be informed they are the host (for safety)
             io.to(room.players[0].id).emit("host");
         }
 
@@ -76,7 +73,6 @@ io.on("connection", (socket) => {
     });
 
     socket.on("startGame", () => {
-        // Authorization: Only the host can start the game
         if (room.players.length === 0 || room.players[0].id !== socket.id) {
             console.log("Unauthorized startGame attempt by", socket.id);
             return;
@@ -91,15 +87,38 @@ io.on("connection", (socket) => {
         startGame(room);
 
         console.log("\n========== GAME START ==========\n");
-        room.players.forEach(player => {
-            console.log(`${player.name}'s Hand:`);
-            console.table(player.hand);
-        });
-        console.log("Top Card:", room.discardPile[room.discardPile.length - 1]);
-        console.log("Cards Remaining:", room.deck.length);
-
-        // Broadcast sanitized state to all players
         broadcastGameState();
+    });
+
+    socket.on("playCard", (data) => {
+        if (!room.started) return;
+
+        const result = playCardAction(room, socket.id, data.cardIndex);
+        if (result.success) {
+            if (result.winner) {
+                console.log(`\n========== GAME OVER: ${result.winner} wins! ==========\n`);
+                io.emit("gameOver", { winner: result.winner });
+                io.emit("playerList", room.players.map(p => ({ id: p.id, name: p.name })));
+                if (room.players.length > 0) {
+                    io.to(room.players[0].id).emit("host");
+                }
+            } else {
+                broadcastGameState();
+            }
+        } else {
+            socket.emit("actionError", result.reason);
+        }
+    });
+
+    socket.on("drawCard", () => {
+        if (!room.started) return;
+
+        const result = drawCardAction(room, socket.id);
+        if (result.success) {
+            broadcastGameState();
+        } else {
+            socket.emit("actionError", result.reason);
+        }
     });
 
     socket.on("disconnect", () => {
@@ -111,7 +130,6 @@ io.on("connection", (socket) => {
             console.log("Player disconnected:", removedPlayer.name, socket.id);
 
             if (room.started) {
-                // If game in progress, reset and return to lobby
                 room.started = false;
                 room.deck = [];
                 room.discardPile = [];
@@ -120,10 +138,8 @@ io.on("connection", (socket) => {
                 io.emit("gameReset", { message: `${removedPlayer.name} disconnected. Game has been reset.` });
             }
 
-            // Broadcast updated player list
             io.emit("playerList", room.players.map(p => ({ id: p.id, name: p.name })));
 
-            // Host migration: if any player left, make the first one the host
             if (room.players.length > 0) {
                 io.to(room.players[0].id).emit("host");
             }

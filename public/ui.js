@@ -1,140 +1,468 @@
-// UI elements local to ui.js
+// ==============================
+// UI ELEMENTS
+// ==============================
+
 const playerList = document.getElementById("playerList");
 const opponentsList = document.getElementById("opponentsList");
+
 const activeTurnName = document.getElementById("activeTurnName");
 const playDirectionText = document.getElementById("playDirectionText");
+
 const deckCountText = document.getElementById("deckCountText");
 const topCardDisplay = document.getElementById("topCardDisplay");
+
 const playerHand = document.getElementById("playerHand");
 const handCountText = document.getElementById("handCountText");
 
-// Helper to transition between screens
+const drawButton = document.getElementById("drawButton");
+
+let myTurn = false;
+
+
+// ==============================
+// SCREEN SWITCHER
+// ==============================
+
 function showScreen(screenId) {
+
     joinScreen.classList.add("hidden");
     lobbyScreen.classList.add("hidden");
     gameScreen.classList.add("hidden");
 
-    if (screenId === "join") joinScreen.classList.remove("hidden");
-    if (screenId === "lobby") lobbyScreen.classList.remove("hidden");
-    if (screenId === "game") gameScreen.classList.remove("hidden");
-}
-
-// Generate beautiful HTML for an UNO card
-function createCardHTML(card) {
-    if (!card) {
-        return `<div class="card-placeholder">Empty</div>`;
+    if (screenId === "join") {
+        joinScreen.classList.remove("hidden");
     }
 
-    const colorClass = card.color; // red, yellow, green, blue, wild
-    const value = card.value;
-    let displayValue = value;
+    if (screenId === "lobby") {
+        lobbyScreen.classList.remove("hidden");
+    }
 
-    if (value === "skip") displayValue = "⊘";
-    else if (value === "reverse") displayValue = "⇄";
-    else if (value === "draw2") displayValue = "+2";
-    else if (value === "draw4") displayValue = "+4";
-    else if (value === "wild") displayValue = "★";
+    if (screenId === "game") {
+        gameScreen.classList.remove("hidden");
+    }
 
-    const isWild = (card.color === "wild");
-    const ellipseClass = isWild ? "card-inner wild-inner" : "card-inner";
-    const displayContent = isWild ? "" : `<span class="center-text">${displayValue}</span>`;
-
-    return `
-        <div class="card ${colorClass}">
-            <div class="corner top-left">${displayValue}</div>
-            <div class="${ellipseClass}">
-                ${displayContent}
-            </div>
-            <div class="corner bottom-right">${displayValue}</div>
-        </div>
-    `;
 }
 
-// Socket: Update player lobby list
+
+// ==============================
+// CARD HTML
+// ==============================
+
+function createCardHTML(card) {
+
+    if (!card) {
+
+        return `<div class="card-placeholder">Empty</div>`;
+
+    }
+
+    let displayValue = card.value;
+
+    switch (card.value) {
+
+        case "skip":
+            displayValue = "⊘";
+            break;
+
+        case "reverse":
+            displayValue = "⇄";
+            break;
+
+        case "draw2":
+            displayValue = "+2";
+            break;
+
+        case "wild":
+            displayValue = "★";
+            break;
+
+        case "draw4":
+            displayValue = "+4";
+            break;
+
+    }
+
+    const isWild = card.color === "wild";
+
+    return `
+
+    <div class="card ${card.color}">
+
+        <div class="corner top-left">
+            ${displayValue}
+        </div>
+
+        <div class="${isWild ? "card-inner wild-inner" : "card-inner"}">
+
+            ${
+                isWild
+                    ? ""
+                    : `<span class="center-text">${displayValue}</span>`
+            }
+
+        </div>
+
+        <div class="corner bottom-right">
+            ${displayValue}
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+// ==============================
+// PLAYER LIST
+// ==============================
+
 socket.on("playerList", (players) => {
-    // Show lobby screen if not already in game
+
     if (gameScreen.classList.contains("hidden")) {
+
         showScreen("lobby");
+
     }
 
     playerList.innerHTML = "";
+
     players.forEach(player => {
+
         const li = document.createElement("li");
+
         li.textContent = player.name;
+
         playerList.appendChild(li);
+
     });
+
 });
 
-// Socket: Designated as host (show start button)
+
+// ==============================
+// HOST
+// ==============================
+
 socket.on("host", () => {
+
     startButton.classList.remove("hidden");
+
 });
 
-// Socket: Receive sanitized game state
+
+// ==============================
+// GAME STATE
+// ==============================
+
 socket.on("gameState", (state) => {
-    if (state.started) {
-        showScreen("game");
-    } else {
+
+    if (!state.started) {
+
         showScreen("lobby");
+
         return;
+
     }
 
-    // 1. Update Turn and Direction
-    const activePlayer = state.players.find(p => p.isCurrent);
+    showScreen("game");
+
+    const activePlayer = state.players.find(
+
+        p => p.isCurrent
+
+    );
+
+    myTurn = false;
+
     if (activePlayer) {
-        const isSelf = activePlayer.id === socket.id;
-        activeTurnName.textContent = isSelf ? "YOUR TURN" : activePlayer.name;
+
+        myTurn = activePlayer.id === socket.id;
+
+        activeTurnName.textContent = myTurn
+
+            ? "YOUR TURN"
+
+            : `${activePlayer.name}'s Turn`;
+
     } else {
+
         activeTurnName.textContent = "-";
+
     }
 
-    playDirectionText.textContent = state.direction === 1 ? "Clockwise" : "Counter-Clockwise";
+    playDirectionText.textContent =
 
-    // 2. Update Players & Card counts sidebar
+        state.direction === 1
+
+            ? "Clockwise"
+
+            : "Counter Clockwise";
+
+
+
+    // ==========================
+    // SIDEBAR
+    // ==========================
+
     opponentsList.innerHTML = "";
+
     state.players.forEach(player => {
-        const item = document.createElement("div");
-        item.className = "opponent-item";
+
+        const div = document.createElement("div");
+
+        div.className = "opponent-item";
+
         if (player.isCurrent) {
-            item.classList.add("active-turn");
+
+            div.classList.add("active-turn");
+
         }
 
-        const isSelf = player.id === socket.id;
-        const displayName = isSelf ? `${player.name} (You)` : player.name;
+        const you =
 
-        item.innerHTML = `
-            <span class="opp-name">${displayName}</span>
-            <span class="opp-cards">${player.cardCount} cards</span>
+            player.id === socket.id
+
+                ? " (You)"
+
+                : "";
+
+        div.innerHTML = `
+
+        <span class="opp-name">
+
+            ${player.name}${you}
+
+        </span>
+
+        <span class="opp-cards">
+
+            ${player.cardCount} cards
+
+        </span>
+
         `;
-        opponentsList.appendChild(item);
+
+        opponentsList.appendChild(div);
+
     });
 
-    // 3. Update Draw Deck Count & Discard Pile Top Card
-    deckCountText.textContent = state.deckCount;
-    topCardDisplay.innerHTML = createCardHTML(state.topCard);
 
-    // 4. Update Your Hand
+
+    // ==========================
+    // TOP CARD
+    // ==========================
+
+    deckCountText.textContent = state.deckCount;
+
+    topCardDisplay.innerHTML =
+
+        createCardHTML(state.topCard);
+
+
+
+    // ==========================
+    // HAND
+    // ==========================
+
     playerHand.innerHTML = "";
+
     handCountText.textContent = state.hand.length;
 
-    state.hand.forEach(card => {
-        const cardContainer = document.createElement("div");
-        cardContainer.innerHTML = createCardHTML(card);
-        playerHand.appendChild(cardContainer.firstElementChild);
+    state.hand.forEach((card, index) => {
+
+        const wrapper = document.createElement("div");
+
+        wrapper.innerHTML = createCardHTML(card);
+
+        const element = wrapper.firstElementChild;
+
+        if (myTurn) {
+
+            element.style.cursor = "pointer";
+
+            element.addEventListener("click", () => {
+
+                socket.emit("playCard", {
+
+                    cardIndex: index
+
+                });
+
+            });
+
+        } else {
+
+            element.style.opacity = "0.6";
+
+            element.style.cursor = "default";
+
+        }
+
+        playerHand.appendChild(element);
+
     });
-});
 
-// Socket: Game reset (disconnect mid-game)
+    if (drawButton) {
+
+        drawButton.disabled = !myTurn;
+
+    }
+
+});
+// ==============================
+// GAME RESET
+// ==============================
+
 socket.on("gameReset", (data) => {
+
     alert(data.message);
+
     showScreen("lobby");
+
+    playerHand.innerHTML = "";
+
+    opponentsList.innerHTML = "";
+
+    topCardDisplay.innerHTML = "";
+
+    deckCountText.textContent = "-";
+
+    handCountText.textContent = "0";
+
+    activeTurnName.textContent = "-";
+
 });
 
-// Error handlers
-socket.on("joinError", (msg) => {
-    alert(msg);
+
+// ==============================
+// GAME OVER
+// ==============================
+
+socket.on("gameOver", (data) => {
+
+    alert(`${data.winner} wins the game!`);
+
+    playerHand.innerHTML = "";
+
+    opponentsList.innerHTML = "";
+
+    showScreen("lobby");
+
 });
 
-socket.on("startError", (msg) => {
-    alert(msg);
+
+// ==============================
+// ACTION ERROR
+// ==============================
+
+socket.on("actionError", (message) => {
+
+    alert(message);
+
 });
+
+
+// ==============================
+// JOIN ERROR
+// ==============================
+
+socket.on("joinError", (message) => {
+
+    alert(message);
+
+});
+
+
+// ==============================
+// START ERROR
+// ==============================
+
+socket.on("startError", (message) => {
+
+    alert(message);
+
+});
+
+
+// ==============================
+// CONNECTION EVENTS
+// ==============================
+
+socket.on("connect", () => {
+
+    console.log("Connected:", socket.id);
+
+});
+
+
+socket.on("disconnect", () => {
+
+    alert("Disconnected from server.");
+
+});
+
+
+socket.on("connect_error", (err) => {
+
+    console.error(err);
+
+});
+
+
+// ==============================
+// DRAW BUTTON
+// ==============================
+
+if (drawButton) {
+
+    drawButton.addEventListener("click", () => {
+
+        if (!myTurn) {
+
+            return;
+
+        }
+
+        socket.emit("drawCard");
+
+    });
+
+}
+
+
+// ==============================
+// HELPER
+// ==============================
+
+function clearGameBoard() {
+
+    playerHand.innerHTML = "";
+
+    opponentsList.innerHTML = "";
+
+    topCardDisplay.innerHTML = "";
+
+    deckCountText.textContent = "-";
+
+    handCountText.textContent = "0";
+
+    activeTurnName.textContent = "-";
+
+}
+
+
+// ==============================
+// FUTURE PLACEHOLDERS
+// ==============================
+
+// Future:
+// socket.on("chooseWildColor", ...)
+//
+// socket.on("unoWarning", ...)
+//
+// socket.on("playerSkipped", ...)
+//
+// socket.on("playerDrewCards", ...)
+//
+// socket.on("winnerAnimation", ...)
