@@ -37,9 +37,21 @@ function startGame(room) {
     return room;
 }
 
-function advanceTurn(room) {
-    if (room.players.length === 0) return;
-    room.currentPlayer = (room.currentPlayer + room.direction + room.players.length) % room.players.length;
+function advanceTurn(room, steps = 1) {
+
+    if (room.players.length === 0) {
+        return;
+    }
+
+    const totalPlayers = room.players.length;
+
+    room.currentPlayer =
+        (
+            room.currentPlayer +
+            (room.direction * steps) +
+            (totalPlayers * steps)
+        ) % totalPlayers;
+
 }
 
 function playCardAction(room, socketId, cardIndex) {
@@ -109,12 +121,15 @@ function playCardAction(room, socketId, cardIndex) {
         const winner = player.name;
 
         room.started = false;
+        room.currentPlayer = 0;
+        room.direction = 1;
 
-        room.players.forEach(p => {
-
-            p.hand = [];
-
+        room.players.forEach(player => {
+            player.hand = [];
         });
+
+        room.deck = [];
+        room.discardPile = [];
 
         return {
 
@@ -134,11 +149,10 @@ function playCardAction(room, socketId, cardIndex) {
 
         case "skip":
 
-            // Skip the next player's turn
-            advanceTurn(room);
-            advanceTurn(room);
+            // Skip exactly one player's turn
+            advanceTurn(room, 2);
 
-            break;
+        break;
 
         default:
 
