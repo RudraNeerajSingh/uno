@@ -9,35 +9,55 @@ const {
 } = require("./rules");
 
 function startGame(room) {
+
     room.started = true;
     room.currentPlayer = 0;
     room.direction = 1;
+
     room.pendingDraw = 0;
     room.pendingDrawType = null;
     room.currentColor = null;
+
     room.discardPile = [];
+
     room.deck = createDeck();
     shuffleDeck(room.deck);
 
     room.players.forEach(player => {
+
         player.hand = [];
+
         for (let i = 0; i < 7; i++) {
+
             player.hand.push(
                 drawCard(room.deck)
             );
+
         }
+
     });
 
-    // Ensure the first discard card is a number card
+    // First discard must be a number card
+
     let firstCard = drawCard(room.deck);
-    while (firstCard && typeof firstCard.value !== "number") {
-        room.deck.unshift(firstCard); // put back at bottom of deck
-        shuffleDeck(room.deck);       // reshuffle to keep it random
+
+    while (
+        firstCard &&
+        typeof firstCard.value !== "number"
+    ) {
+
+        room.deck.unshift(firstCard);
+
+        shuffleDeck(room.deck);
+
         firstCard = drawCard(room.deck);
+
     }
+
     room.discardPile.push(firstCard);
 
     return room;
+
 }
 
 function advanceTurn(room, steps = 1) {
@@ -48,12 +68,15 @@ function advanceTurn(room, steps = 1) {
 
     const totalPlayers = room.players.length;
 
-    room.currentPlayer =
-        (
-            room.currentPlayer +
-            (room.direction * steps) +
-            (totalPlayers * steps)
-        ) % totalPlayers;
+    room.currentPlayer = (
+
+        room.currentPlayer +
+
+        (room.direction * steps) +
+
+        (totalPlayers * steps)
+
+    ) % totalPlayers;
 
 }
 
@@ -94,8 +117,7 @@ function drawCards(room, player, amount) {
     }
 
 }
-
-function playCardAction(room, socketId, cardIndex,chosenColor = null) {
+function playCardAction(room, socketId, cardIndex, chosenColor = null) {
 
     const playerIdx = room.players.findIndex(
         p => p.id === socketId
@@ -114,7 +136,7 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
     }
 
     const player = room.players[playerIdx];
-    
+
     if (
         cardIndex < 0 ||
         cardIndex >= player.hand.length
@@ -135,13 +157,40 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
 
     if (room.pendingDraw > 0) {
 
-        // Player may only continue the stack with another Draw Two
-        if (card.value !== "draw2") {
+        if (room.pendingDrawType === "draw2") {
 
-            return {
-                success: false,
-                reason: "You must draw cards or continue the stack."
-            };
+            // House Rule:
+            // Draw 2 can be answered by Draw 2 or Draw 4
+
+            if (
+                card.value !== "draw2" &&
+                card.value !== "draw4"
+            ) {
+
+                return {
+                    success: false,
+                    reason: "You must draw cards or continue the stack."
+                };
+
+            }
+
+        }
+
+        else if (room.pendingDrawType === "draw4") {
+
+            // House Rule:
+            // Draw 4 can ONLY be answered by Draw 4
+
+            if (
+                card.value !== "draw4"
+            ) {
+
+                return {
+                    success: false,
+                    reason: "You must draw cards or continue the stack."
+                };
+
+            }
 
         }
 
@@ -168,15 +217,22 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
     }
 
     // --------------------------
-    // Play the card
+    // Play card
     // --------------------------
 
-    player.hand.splice(cardIndex, 1);
+    player.hand.splice(
+        cardIndex,
+        1
+    );
 
     room.discardPile.push(card);
-    // Any normal colored card clears the previous Wild color
+
+    // Any colored card clears a Wild color
+
     if (card.color !== null) {
+
         room.currentColor = null;
+
     }
 
     // --------------------------
@@ -188,17 +244,25 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
         const winner = player.name;
 
         room.started = false;
+
         room.currentPlayer = 0;
+
         room.direction = 1;
+
         room.pendingDraw = 0;
+
         room.pendingDrawType = null;
+
         room.currentColor = null;
 
         room.players.forEach(player => {
+
             player.hand = [];
+
         });
 
         room.deck = [];
+
         room.discardPile = [];
 
         return {
@@ -210,70 +274,112 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
         };
 
     }
-
     // --------------------------
     // Action Cards
     // --------------------------
 
     switch (card.value) {
 
-    case "skip":
+        case "skip":
 
-        // Skip the next player's turn
-        advanceTurn(room, 2);
-
-        break;
-
-    case "reverse":
-
-        // Reverse play direction
-        room.direction *= -1;
-
-        // In a 2-player game, Reverse acts like Skip
-        if (room.players.length === 2) {
+            // Skip the next player's turn
             advanceTurn(room, 2);
-        } else {
+
+            break;
+
+        case "reverse":
+
+            // Reverse play direction
+            room.direction *= -1;
+
+            // In a 2-player game,
+            // Reverse acts like Skip
+            if (room.players.length === 2) {
+
+                advanceTurn(room, 2);
+
+            }
+
+            else {
+
+                advanceTurn(room);
+
+            }
+
+            break;
+
+        case "draw2":
+
+            // Start or continue Draw Two stack
+
+            room.pendingDraw += 2;
+
+            room.pendingDrawType = "draw2";
+
             advanceTurn(room);
-        }
 
-        break;
-    
-    case "draw2":
+            break;
 
-        // Start or continue a Draw Two stack
-        room.pendingDraw += 2;
-        room.pendingDrawType = "draw2";
+        case "wild":
 
-        // Give the next player a chance to respond
-        advanceTurn(room);
+            if (
 
-        break;
+                chosenColor !== "red" &&
+                chosenColor !== "yellow" &&
+                chosenColor !== "green" &&
+                chosenColor !== "blue"
 
-    case "wild":
+            ) {
 
-        if (
-            chosenColor !== "red" &&
-            chosenColor !== "yellow" &&
-            chosenColor !== "green" &&
-            chosenColor !== "blue"
-        ) {
+                return {
 
-            return {
-                success: false,
-                reason: "Please choose a valid color."
-            };
+                    success: false,
 
-        }
+                    reason: "Please choose a valid color."
 
-        room.currentColor = chosenColor;
+                };
 
-        advanceTurn(room);
+            }
 
-        break;
+            room.currentColor = chosenColor;
+
+            advanceTurn(room);
+
+            break;
+
+        case "draw4":
+
+            if (
+
+                chosenColor !== "red" &&
+                chosenColor !== "yellow" &&
+                chosenColor !== "green" &&
+                chosenColor !== "blue"
+
+            ) {
+
+                return {
+
+                    success: false,
+
+                    reason: "Please choose a valid color."
+
+                };
+
+            }
+
+            room.currentColor = chosenColor;
+
+            room.pendingDraw += 4;
+
+            room.pendingDrawType = "draw4";
+
+            advanceTurn(room);
+
+            break;
 
         default:
 
-            // Number cards
             advanceTurn(room);
 
             break;
@@ -289,7 +395,6 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
     };
 
 }
-
 function drawCardAction(room, socketId) {
 
     const playerIdx = room.players.findIndex(
@@ -300,10 +405,12 @@ function drawCardAction(room, socketId) {
         playerIdx === -1 ||
         playerIdx !== room.currentPlayer
     ) {
+
         return {
             success: false,
             reason: "Not your turn."
         };
+
     }
 
     const player = room.players[playerIdx];
@@ -328,29 +435,50 @@ function drawCardAction(room, socketId) {
         advanceTurn(room);
 
         return {
+
             success: true,
+
             forcedDraw: true,
+
             amount
+
         };
 
     }
 
-    drawCards(room, player, 1);
+    // --------------------------
+    // Normal draw
+    // --------------------------
+
+    drawCards(
+        room,
+        player,
+        1
+    );
 
     const drawnCard =
-        player.hand[player.hand.length - 1];
+        player.hand[
+            player.hand.length - 1
+        ];
 
     advanceTurn(room);
 
     return {
+
         success: true,
+
         card: drawnCard
+
     };
 
 }
 
 module.exports = {
+
     startGame,
+
     playCardAction,
+
     drawCardAction
+
 };

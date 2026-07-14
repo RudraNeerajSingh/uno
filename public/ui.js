@@ -284,7 +284,7 @@ socket.on("gameState", (state) => {
             element.addEventListener("click", () => {
 
     // Wild card
-    if (card.value === "wild") {
+    if (card.value === "wild" || card.value === "draw4") {
 
         let chosenColor = prompt(
             "Choose a color:\nred\nyellow\ngreen\nblue"
