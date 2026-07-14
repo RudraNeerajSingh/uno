@@ -379,3 +379,14 @@ Working code is more valuable than clever code.
 Every new feature should require minimal modification of existing files.
 
 The server is always the single source of truth.
+
+# Change Policy
+
+Before implementing a feature:
+
+1. Determine the minimum number of files that must change.
+2. Do not modify any unrelated file.
+3. Preserve all working functionality.
+4. Backend changes require verifying frontend compatibility.
+5. Frontend changes require verifying backend compatibility.
+6. Every change must include a regression analysis before code generation.
