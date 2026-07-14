@@ -40,6 +40,9 @@ function isValidPlay(card, topCard) {
 
         case "reverse":
             return topCard.value === "reverse";
+        
+        case "draw2":
+        return topCard.value === "draw2";
 
         default:
             return false;

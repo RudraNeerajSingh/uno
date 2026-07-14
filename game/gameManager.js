@@ -113,7 +113,7 @@ function playCardAction(room, socketId, cardIndex) {
     }
 
     const player = room.players[playerIdx];
-
+    
     if (
         cardIndex < 0 ||
         cardIndex >= player.hand.length
@@ -209,6 +209,27 @@ function playCardAction(room, socketId, cardIndex) {
         }
 
         break;
+    
+    case "draw2": {
+
+    // Find the next player
+    const nextPlayerIndex =
+        (
+            room.currentPlayer +
+            room.direction +
+            room.players.length
+        ) % room.players.length;
+
+    const nextPlayer = room.players[nextPlayerIndex];
+
+    // Draw two cards
+    drawCards(room, nextPlayer, 2);
+
+    // Skip that player's turn
+    advanceTurn(room, 2);
+
+    break;
+}
 
     default:
 
