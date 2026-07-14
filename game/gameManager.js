@@ -153,7 +153,11 @@ function playCardAction(room, socketId, cardIndex,chosenColor = null) {
         ];
 
     if (
-        !isValidPlay(card, topCard)
+        !isValidPlay(
+            card,
+            topCard,
+            room.currentColor
+        )
     ) {
 
         return {

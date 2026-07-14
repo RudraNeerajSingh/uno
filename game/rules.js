@@ -13,14 +13,20 @@ const { drawCard } = require("./deck");
  * - Wild
  * - Wild Draw Four
  */
-function isValidPlay(card, topCard) {
+function isValidPlay(card, topCard, currentColor = null) {
 
     if (!card || !topCard) {
         return false;
     }
 
-    // Same color always works
-    if (card.color === topCard.color) {
+    // --------------------------
+    // Active color
+    // --------------------------
+
+    const activeColor = currentColor ?? topCard.color;
+
+    // Same color
+    if (card.color === activeColor) {
         return true;
     }
 
@@ -40,15 +46,15 @@ function isValidPlay(card, topCard) {
 
         case "reverse":
             return topCard.value === "reverse";
-        
+
         case "draw2":
-        return topCard.value === "draw2";
+            return topCard.value === "draw2";
 
         case "wild":
-        return true;
+            return true;
 
         case "draw4":
-        return true;
+            return true;
 
         default:
             return false;
@@ -56,13 +62,6 @@ function isValidPlay(card, topCard) {
     }
 
 }
-
-/**
- * Advances the turn.
- *
- * steps = 1 -> normal
- * steps = 2 -> skip
- */
 function advanceTurn(room, steps = 1) {
 
     const totalPlayers = room.players.length;
