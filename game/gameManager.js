@@ -43,37 +43,120 @@ function advanceTurn(room) {
 }
 
 function playCardAction(room, socketId, cardIndex) {
-    const playerIdx = room.players.findIndex(p => p.id === socketId);
-    if (playerIdx === -1 || playerIdx !== room.currentPlayer) {
-        return { success: false, reason: "Not your turn." };
+
+    const playerIdx = room.players.findIndex(
+        p => p.id === socketId
+    );
+
+    if (
+        playerIdx === -1 ||
+        playerIdx !== room.currentPlayer
+    ) {
+
+        return {
+            success: false,
+            reason: "Not your turn."
+        };
+
     }
 
     const player = room.players[playerIdx];
-    if (cardIndex < 0 || cardIndex >= player.hand.length) {
-        return { success: false, reason: "Invalid card index." };
+
+    if (
+        cardIndex < 0 ||
+        cardIndex >= player.hand.length
+    ) {
+
+        return {
+            success: false,
+            reason: "Invalid card index."
+        };
+
     }
 
     const card = player.hand[cardIndex];
-    const topCard = room.discardPile[room.discardPile.length - 1];
 
-    if (!isValidPlay(card, topCard)) {
-        return { success: false, reason: "Illegal card play. Must match color or number card." };
+    const topCard =
+        room.discardPile[
+            room.discardPile.length - 1
+        ];
+
+    if (
+        !isValidPlay(card, topCard)
+    ) {
+
+        return {
+            success: false,
+            reason: "Illegal card play."
+        };
+
     }
 
-    // Play card
+    // --------------------------
+    // Play the card
+    // --------------------------
+
     player.hand.splice(cardIndex, 1);
+
     room.discardPile.push(card);
 
-    let winner = null;
+    // --------------------------
+    // Winner
+    // --------------------------
+
     if (player.hand.length === 0) {
-        winner = player.name;
+
+        const winner = player.name;
+
         room.started = false;
-        room.players.forEach(p => p.hand = []);
-    } else {
-        advanceTurn(room);
+
+        room.players.forEach(p => {
+
+            p.hand = [];
+
+        });
+
+        return {
+
+            success: true,
+
+            winner
+
+        };
+
     }
 
-    return { success: true, winner };
+    // --------------------------
+    // Action Cards
+    // --------------------------
+
+    switch (card.value) {
+
+        case "skip":
+
+            // Skip the next player's turn
+            advanceTurn(room);
+            advanceTurn(room);
+
+            break;
+
+        default:
+
+            // Normal number card
+            advanceTurn(room);
+
+            break;
+
+    }
+
+    return {
+
+        success: true,
+
+        playedCard: card
+
+    };
+
 }
 
 function drawCardAction(room, socketId) {

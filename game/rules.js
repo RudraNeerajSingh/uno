@@ -2,8 +2,16 @@ const { drawCard } = require("./deck");
 
 /**
  * Returns true if the card can legally be played.
- * Currently supports ONLY number cards.
- * Action cards will be added later.
+ *
+ * Supported:
+ * - Number cards
+ * - Skip cards
+ *
+ * Upcoming:
+ * - Reverse
+ * - Draw Two
+ * - Wild
+ * - Wild Draw Four
  */
 function isValidPlay(card, topCard) {
 
@@ -11,31 +19,51 @@ function isValidPlay(card, topCard) {
         return false;
     }
 
-    // Ignore action cards for Milestone 2
+    // ---------- Number Cards ----------
+
     if (
-        typeof card.value !== "number" ||
-        typeof topCard.value !== "number"
+        typeof card.value === "number" &&
+        typeof topCard.value === "number"
     ) {
-        return false;
+
+        return (
+            card.color === topCard.color ||
+            card.value === topCard.value
+        );
+
     }
 
-    return (
-        card.color === topCard.color ||
-        card.value === topCard.value
-    );
+    // ---------- Skip Card ----------
+
+    if (card.value === "skip") {
+
+        return (
+            card.color === topCard.color ||
+            topCard.value === "skip"
+        );
+
+    }
+
+    return false;
 
 }
 
 /**
  * Advances the turn.
+ *
+ * steps = 1 -> normal
+ * steps = 2 -> skip
  */
-function advanceTurn(room) {
+function advanceTurn(room, steps = 1) {
 
     const totalPlayers = room.players.length;
 
     room.currentPlayer =
-        (room.currentPlayer + room.direction + totalPlayers) %
-        totalPlayers;
+        (
+            room.currentPlayer +
+            (room.direction * steps) +
+            totalPlayers * steps
+        ) % totalPlayers;
 
 }
 
@@ -147,10 +175,10 @@ function playCard(room, playerId, cardIndex) {
 
     }
 
-    // Remove card from hand
+    // Remove from hand
     currentPlayer.hand.splice(cardIndex, 1);
 
-    // Add to discard pile
+    // Place onto discard pile
     room.discardPile.push(selectedCard);
 
     // Winner
@@ -163,10 +191,13 @@ function playCard(room, playerId, cardIndex) {
 
     }
 
+    // Normal turn advance
+    // Skip logic will be handled in gameManager.js
     advanceTurn(room);
 
     return {
-        success: true
+        success: true,
+        playedCard: selectedCard
     };
 
 }
