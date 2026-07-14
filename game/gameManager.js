@@ -185,7 +185,7 @@ function drawCardAction(room, socketId) {
             return { success: false, reason: "No cards left in the deck to draw." };
         }
         const topCard = room.discardPile.pop();
-        room.deck = room.discardPile;
+        room.deck = [...room.discardPile];
         shuffleDeck(room.deck);
         room.discardPile = [topCard];
     }
