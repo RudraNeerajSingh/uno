@@ -19,32 +19,32 @@ function isValidPlay(card, topCard) {
         return false;
     }
 
-    // ---------- Number Cards ----------
+    // Same color always works
+    if (card.color === topCard.color) {
+        return true;
+    }
 
+    // Same number
     if (
         typeof card.value === "number" &&
         typeof topCard.value === "number"
     ) {
-
-        return (
-            card.color === topCard.color ||
-            card.value === topCard.value
-        );
-
+        return card.value === topCard.value;
     }
 
-    // ---------- Skip Card ----------
+    // Same action card
+    switch (card.value) {
 
-    if (card.value === "skip") {
+        case "skip":
+            return topCard.value === "skip";
 
-        return (
-            card.color === topCard.color ||
-            topCard.value === "skip"
-        );
+        case "reverse":
+            return topCard.value === "reverse";
+
+        default:
+            return false;
 
     }
-
-    return false;
 
 }
 

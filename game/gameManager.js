@@ -147,21 +147,35 @@ function playCardAction(room, socketId, cardIndex) {
 
     switch (card.value) {
 
-        case "skip":
+    case "skip":
 
-            // Skip exactly one player's turn
-            advanceTurn(room, 2);
+        // Skip the next player's turn
+        advanceTurn(room, 2);
 
         break;
 
-        default:
+    case "reverse":
 
-            // Normal number card
+        // Reverse play direction
+        room.direction *= -1;
+
+        // In a 2-player game, Reverse acts like Skip
+        if (room.players.length === 2) {
+            advanceTurn(room, 2);
+        } else {
             advanceTurn(room);
+        }
 
-            break;
+        break;
 
-    }
+    default:
+
+        // Number cards
+        advanceTurn(room);
+
+        break;
+
+}
 
     return {
 
