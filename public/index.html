@@ -68,11 +68,20 @@
             </div>
 
             <div class="direction-indicator">
-                Play Direction:
-                <span id="playDirectionText">Clockwise</span>
+
+                <div>
+                    Play Direction:
+                    <span id="playDirectionText">Clockwise</span>
+                </div>
+
+            <div style="margin-top:6px;">
+                Current Color:
+                <span id="currentColorText">None</span>
             </div>
 
-        </div>
+    </div>
+
+</div>
 
         <!-- Table -->
 
@@ -156,10 +165,53 @@
 
             </div>
 
-            <div
+                        <div
                 id="playerHand"
                 class="hand"
             ></div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- WILD COLOR PICKER -->
+    <!-- ========================= -->
+
+    <div
+        id="wildOverlay"
+        class="hidden"
+    >
+
+        <div class="wild-modal">
+
+            <h2>
+                Choose a Color
+            </h2>
+
+            <div class="wild-buttons">
+
+                <button
+                    class="wild-choice red"
+                    data-color="red"
+                ></button>
+
+                <button
+                    class="wild-choice yellow"
+                    data-color="yellow"
+                ></button>
+
+                <button
+                    class="wild-choice green"
+                    data-color="green"
+                ></button>
+
+                <button
+                    class="wild-choice blue"
+                    data-color="blue"
+                ></button>
+
+            </div>
 
         </div>
 

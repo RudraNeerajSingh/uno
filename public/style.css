@@ -352,3 +352,117 @@ li {
     font-size: 14px;
     margin: auto;
 }
+
+/* ===========================
+   Wild Color Picker
+=========================== */
+
+#wildOverlay{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(0,0,0,.65);
+
+    z-index:9999;
+
+}
+
+#wildOverlay.hidden{
+
+    display:none;
+
+}
+
+.wild-modal{
+
+    background:#ffffff;
+
+    color:#222;
+
+    padding:30px;
+
+    border-radius:16px;
+
+    min-width:340px;
+
+    text-align:center;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.35);
+
+}
+
+.wild-modal h2{
+
+    margin:0;
+
+    margin-bottom:22px;
+
+}
+
+.wild-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:18px;
+
+}
+
+.wild-choice{
+
+    width:70px;
+
+    height:70px;
+
+    margin:0;
+
+    padding:0;
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    transition:transform .15s ease;
+
+}
+
+.wild-choice:hover{
+
+    transform:scale(1.12);
+
+}
+
+.wild-choice.red{
+
+    background:#d63031;
+
+}
+
+.wild-choice.yellow{
+
+    background:#f1c40f;
+
+}
+
+.wild-choice.green{
+
+    background:#2ecc71;
+
+}
+
+.wild-choice.blue{
+
+    background:#3498db;
+
+}

@@ -7,6 +7,7 @@ const opponentsList = document.getElementById("opponentsList");
 
 const activeTurnName = document.getElementById("activeTurnName");
 const playDirectionText = document.getElementById("playDirectionText");
+const currentColorText = document.getElementById("currentColorText");
 
 const deckCountText = document.getElementById("deckCountText");
 const topCardDisplay = document.getElementById("topCardDisplay");
@@ -15,6 +16,12 @@ const playerHand = document.getElementById("playerHand");
 const handCountText = document.getElementById("handCountText");
 
 const drawButton = document.getElementById("drawButton");
+
+const wildOverlay = document.getElementById("wildOverlay");
+const wildButtons = document.querySelectorAll(".wild-choice");
+
+let pendingWildIndex = null;
+let pendingWildDraw4 = false;
 
 let myTurn = false;
 
@@ -198,6 +205,14 @@ socket.on("gameState", (state) => {
             ? "Clockwise"
 
             : "Counter Clockwise";
+    if (currentColorText) {
+
+        currentColorText.textContent =
+            state.currentColor
+                ? state.currentColor.toUpperCase()
+                : "None";
+
+    }
 
 
 
@@ -283,43 +298,21 @@ socket.on("gameState", (state) => {
 
             element.addEventListener("click", () => {
 
-    // Wild card
-    if (card.value === "wild" || card.value === "draw4") {
+    if (
+        card.value === "wild" ||
+        card.value === "draw4"
+    ) {
 
-        let chosenColor = prompt(
-            "Choose a color:\nred\nyellow\ngreen\nblue"
-        );
+        pendingWildIndex = index;
 
-        if (!chosenColor) {
-            return;
-        }
+        pendingWildDraw4 =
+            card.value === "draw4";
 
-        chosenColor = chosenColor.toLowerCase().trim();
-
-        if (
-            chosenColor !== "red" &&
-            chosenColor !== "yellow" &&
-            chosenColor !== "green" &&
-            chosenColor !== "blue"
-        ) {
-
-            alert("Invalid color.");
-
-            return;
-
-        }
-
-        socket.emit("playCard", {
-
-            cardIndex: index,
-
-            chosenColor
-
-        });
+        wildOverlay.classList.remove("hidden");
 
         return;
 
-    }
+    }   
 
     // Every other card
 
@@ -357,6 +350,10 @@ socket.on("gameReset", (data) => {
 
     alert(data.message);
 
+    wildOverlay.classList.add("hidden");
+
+    pendingWildIndex = null;
+
     showScreen("lobby");
 
     playerHand.innerHTML = "";
@@ -370,6 +367,8 @@ socket.on("gameReset", (data) => {
     handCountText.textContent = "0";
 
     activeTurnName.textContent = "-";
+
+    currentColorText.textContent = "None";
 
 });
 
@@ -386,7 +385,13 @@ socket.on("gameOver", (data) => {
 
     opponentsList.innerHTML = "";
 
+    wildOverlay.classList.add("hidden");
+
+    pendingWildIndex = null;
+
     showScreen("lobby");
+
+    currentColorText.textContent = "None";
 
 });
 
@@ -437,6 +442,8 @@ socket.on("connect", () => {
 
 socket.on("disconnect", () => {
 
+    wildOverlay.classList.add("hidden");
+    pendingWildIndex = null;
     alert("Disconnected from server.");
 
 });
@@ -469,6 +476,32 @@ if (drawButton) {
 
 }
 
+wildButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        if (pendingWildIndex === null) {
+            return;
+        }
+
+        socket.emit("playCard", {
+
+            cardIndex: pendingWildIndex,
+
+            chosenColor: button.dataset.color
+
+        });
+
+        pendingWildIndex = null;
+
+        pendingWildDraw4 = false;
+
+        wildOverlay.classList.add("hidden");
+
+    });
+
+});
+
 
 // ==============================
 // HELPER
@@ -487,6 +520,8 @@ function clearGameBoard() {
     handCountText.textContent = "0";
 
     activeTurnName.textContent = "-";
+
+    currentColorText.textContent = "None";
 
 }
 
