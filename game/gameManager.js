@@ -128,6 +128,24 @@ function playCardAction(room, socketId, cardIndex) {
 
     const card = player.hand[cardIndex];
 
+    // --------------------------
+    // Pending Draw Check
+    // --------------------------
+
+    if (room.pendingDraw > 0) {
+
+        // Player may only continue the stack with another Draw Two
+        if (card.value !== "draw2") {
+
+            return {
+                success: false,
+                reason: "You must draw cards or continue the stack."
+            };
+
+        }
+
+    }
+
     const topCard =
         room.discardPile[
             room.discardPile.length - 1
@@ -210,35 +228,25 @@ function playCardAction(room, socketId, cardIndex) {
 
         break;
     
-    case "draw2": {
+    case "draw2":
 
-    // Find the next player
-    const nextPlayerIndex =
-        (
-            room.currentPlayer +
-            room.direction +
-            room.players.length
-        ) % room.players.length;
+        // Start or continue a Draw Two stack
+        room.pendingDraw += 2;
+        room.pendingDrawType = "draw2";
 
-    const nextPlayer = room.players[nextPlayerIndex];
-
-    // Draw two cards
-    drawCards(room, nextPlayer, 2);
-
-    // Skip that player's turn
-    advanceTurn(room, 2);
-
-    break;
-}
-
-    default:
-
-        // Number cards
+        // Give the next player a chance to respond
         advanceTurn(room);
 
         break;
 
-}
+        default:
+
+            // Number cards
+            advanceTurn(room);
+
+            break;
+
+    }
 
     return {
 
@@ -267,6 +275,33 @@ function drawCardAction(room, socketId) {
     }
 
     const player = room.players[playerIdx];
+
+    // --------------------------
+    // Resolve pending draw
+    // --------------------------
+
+    if (room.pendingDraw > 0) {
+
+        drawCards(
+            room,
+            player,
+            room.pendingDraw
+        );
+
+        const amount = room.pendingDraw;
+
+        room.pendingDraw = 0;
+        room.pendingDrawType = null;
+
+        advanceTurn(room);
+
+        return {
+            success: true,
+            forcedDraw: true,
+            amount
+        };
+
+    }
 
     drawCards(room, player, 1);
 
